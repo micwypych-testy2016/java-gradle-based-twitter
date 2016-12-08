@@ -8,11 +8,18 @@ import java.util.PriorityQueue;
 
 import org.joda.time.LocalDateTime;
 
+import com.google.common.base.MoreObjects;
+
 public class Twitter {
 
+	final int LAST_TWEETS_NUMBER;
 	/** Initialize your data structure here. */
+	public Twitter(int tweetNumberInFeed) {
+		LAST_TWEETS_NUMBER = tweetNumberInFeed;
+	}
+	
 	public Twitter() {
-
+		this(10);
 	}
 
 	/** Compose a new tweet. */
@@ -36,8 +43,8 @@ public class Twitter {
 	 * in the news feed must be posted by users who the user followed or by the
 	 * user herself. Tweets must be ordered from most recent to least recent.
 	 */
-	public List<Integer> s(int userId) {
-		final int LAST_TWEETS_NUMBER = 2;
+	public List<Integer> getNewsFeed(int userId) {
+		
 		createUserIfNecessary(userId);
 		PriorityQueue<Tweet> lastMessages = new PriorityQueue<>();
 		for (List<Tweet> tweets : allFollowingAndMyTweets(userId)) {
@@ -45,6 +52,7 @@ public class Twitter {
 				if (lastMessages.size() < LAST_TWEETS_NUMBER) {
 					lastMessages.add(tweet);
 				} else if (lastMessages.peek().compareTo(tweet) > 0){
+					lastMessages.poll();
 					lastMessages.add(tweet);
 				} else {
 					continue;
@@ -80,7 +88,10 @@ public class Twitter {
 	public void unfollow(int followerId, int followeeId) {
 		createUserIfNecessary(followerId);
 		createUserIfNecessary(followeeId);
-		usersFollowedByUser.get(followerId).remove(followeeId);
+		List<Integer> followees = usersFollowedByUser.get(followerId);
+		if (followees.contains(followeeId)) {
+			followees.remove(followeeId);
+		}
 	}
 	
 
@@ -122,6 +133,16 @@ public class Twitter {
 		public int compareTo(Tweet o) {
 			return -this.createdAt.compareTo(o.createdAt);
 		}
+
+		@Override
+		public String toString() {
+			return MoreObjects.toStringHelper(this)
+					.add("tweetId", tweetId)
+					.add("createdAt", createdAt)
+					.toString();
+		}
+		
+		
 	}
 }
 
